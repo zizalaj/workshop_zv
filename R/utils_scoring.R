@@ -34,28 +34,10 @@ empty_feedback_tibble <- function() {
   )
 }
 
-entity_columns <- function(entity = c("teacher", "client")) {
-  entity <- match.arg(entity)
-
-  if (identical(entity, "teacher")) {
-    return(c("teacher_id", "teacher_name"))
-  }
-
-  c("client_id", "client_name")
-}
-
 ordered_dimensions <- function(dimensions) {
   known <- names(dimension_weights)
   extras <- sort(setdiff(unique(dimensions), known))
   unique(c(known, extras))
-}
-
-detect_score_scale_max <- function(feedback, minimum = 5) {
-  if (is.null(feedback) || !nrow(feedback) || all(is.na(feedback$dimension_score))) {
-    return(minimum)
-  }
-
-  max(minimum, ceiling(max(feedback$dimension_score, na.rm = TRUE)))
 }
 
 append_composite_score <- function(feedback, weights = dimension_weights) {
@@ -83,41 +65,6 @@ append_composite_score <- function(feedback, weights = dimension_weights) {
     dplyr::left_join(response_scores, by = "response_id")
 }
 
-apply_feedback_filters <- function(feedback, filters, include_date = TRUE) {
-  if (is.null(feedback) || !nrow(feedback)) {
-    return(empty_feedback_tibble())
-  }
-
-  filtered <- feedback
-
-  if (length(filters$teacher_ids %||% character())) {
-    filtered <- filtered |>
-      dplyr::filter(.data$teacher_id %in% filters$teacher_ids)
-  }
-
-  if (length(filters$client_ids %||% character())) {
-    filtered <- filtered |>
-      dplyr::filter(.data$client_id %in% filters$client_ids)
-  }
-
-  if (length(filters$dimensions %||% character())) {
-    filtered <- filtered |>
-      dplyr::filter(.data$dimension %in% filters$dimensions)
-  }
-
-  if (isTRUE(include_date) &&
-      length(filters$date_range %||% as.Date(character())) == 2L &&
-      all(!is.na(filters$date_range))) {
-    filtered <- filtered |>
-      dplyr::filter(
-        .data$workshop_date >= as.Date(filters$date_range[[1]]) &
-          .data$workshop_date <= as.Date(filters$date_range[[2]])
-      )
-  }
-
-  filtered
-}
-
 moving_average <- function(values, window = rolling_window_size) {
   if (!length(values)) {
     return(double())
@@ -127,98 +74,6 @@ moving_average <- function(values, window = rolling_window_size) {
     start_index <- max(1L, index - window + 1L)
     mean(values[start_index:index], na.rm = TRUE)
   })
-}
-
-summarise_responses <- function(feedback) {
-  if (is.null(feedback) || !nrow(feedback)) {
-    return(tibble::tibble(
-      response_id = character(),
-      workshop_id = character(),
-      workshop_date = as.Date(character()),
-      teacher_id = character(),
-      teacher_name = character(),
-      client_id = character(),
-      client_name = character(),
-      n_participants = integer(),
-      comment_text = character(),
-      composite_score = double()
-    ))
-  }
-
-  feedback |>
-    dplyr::group_by(
-      .data$response_id,
-      .data$workshop_id,
-      .data$workshop_date,
-      .data$teacher_id,
-      .data$teacher_name,
-      .data$client_id,
-      .data$client_name
-    ) |>
-    dplyr::summarise(
-      n_participants = dplyr::first(.data$n_participants),
-      comment_text = dplyr::first(.data$comment_text),
-      composite_score = mean(.data$composite_score, na.rm = TRUE),
-      .groups = "drop"
-    )
-}
-
-summarise_workshops <- function(feedback, entity = c("teacher", "client")) {
-  entity <- match.arg(entity)
-  group_cols <- entity_columns(entity)
-
-  responses <- summarise_responses(feedback)
-  if (!nrow(responses)) {
-    return(tibble::tibble(
-      workshop_id = character(),
-      workshop_date = as.Date(character()),
-      entity_id = character(),
-      entity_name = character(),
-      workshop_score = double(),
-      response_n = integer()
-    ))
-  }
-
-  responses |>
-    dplyr::group_by(
-      dplyr::across(dplyr::all_of(group_cols)),
-      .data$workshop_id,
-      .data$workshop_date
-    ) |>
-    dplyr::summarise(
-      workshop_score = mean(.data$composite_score, na.rm = TRUE),
-      response_n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    dplyr::rename(
-      entity_id = !!group_cols[[1]],
-      entity_name = !!group_cols[[2]]
-    )
-}
-
-compute_rolling_average <- function(feedback, entity = c("teacher", "client"), window = rolling_window_size) {
-  entity <- match.arg(entity)
-
-  workshop_summary <- summarise_workshops(feedback, entity)
-  if (!nrow(workshop_summary)) {
-    return(tibble::tibble(
-      entity_id = character(),
-      entity_name = character(),
-      workshop_id = character(),
-      workshop_date = as.Date(character()),
-      workshop_score = double(),
-      response_n = integer(),
-      rolling_average = double()
-    ))
-  }
-
-  workshop_summary |>
-    dplyr::arrange(.data$entity_name, .data$workshop_date, .data$workshop_id) |>
-    dplyr::group_by(.data$entity_id, .data$entity_name) |>
-    dplyr::mutate(
-      rolling_average = moving_average(.data$workshop_score, window = window)
-    ) |>
-    dplyr::ungroup()
 }
 
 summarise_dimension_scores <- function(feedback, entity = c("teacher", "client")) {
@@ -264,95 +119,6 @@ compute_prior_period_bounds <- function(start_date, end_date) {
   )
 }
 
-split_period_data <- function(feedback, start_date, end_date) {
-  bounds <- compute_prior_period_bounds(start_date, end_date)
-
-  list(
-    current = feedback |>
-      dplyr::filter(
-        .data$workshop_date >= bounds$current_start &
-          .data$workshop_date <= bounds$current_end
-      ),
-    prior = feedback |>
-      dplyr::filter(
-        .data$workshop_date >= bounds$prior_start &
-          .data$workshop_date <= bounds$prior_end
-      ),
-    bounds = bounds
-  )
-}
-
-compute_overall_delta <- function(feedback, start_date, end_date) {
-  periods <- split_period_data(feedback, start_date, end_date)
-  current_responses <- summarise_responses(periods$current)
-  prior_responses <- summarise_responses(periods$prior)
-
-  current_average <- if (nrow(current_responses)) {
-    mean(current_responses$composite_score, na.rm = TRUE)
-  } else {
-    NA_real_
-  }
-
-  prior_average <- if (nrow(prior_responses)) {
-    mean(prior_responses$composite_score, na.rm = TRUE)
-  } else {
-    NA_real_
-  }
-
-  list(
-    current_average = current_average,
-    prior_average = prior_average,
-    current_n = nrow(current_responses),
-    prior_n = nrow(prior_responses),
-    delta = current_average - prior_average
-  )
-}
-
-compute_entity_period_delta <- function(feedback, entity = c("teacher", "client"), start_date, end_date) {
-  entity <- match.arg(entity)
-  group_cols <- entity_columns(entity)
-  periods <- split_period_data(feedback, start_date, end_date)
-
-  current_metrics <- summarise_responses(periods$current) |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) |>
-    dplyr::summarise(
-      current_average = mean(.data$composite_score, na.rm = TRUE),
-      current_n = dplyr::n(),
-      .groups = "drop"
-    )
-
-  prior_metrics <- summarise_responses(periods$prior) |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) |>
-    dplyr::summarise(
-      prior_average = mean(.data$composite_score, na.rm = TRUE),
-      prior_n = dplyr::n(),
-      .groups = "drop"
-    )
-
-  dplyr::full_join(current_metrics, prior_metrics, by = group_cols) |>
-    dplyr::mutate(
-      delta = .data$current_average - .data$prior_average
-    )
-}
-
-trend_arrow <- function(delta, tolerance = 0.01) {
-  vapply(delta, function(value) {
-    if (is.na(value)) {
-      return("–")
-    }
-
-    if (value > tolerance) {
-      return("▲")
-    }
-
-    if (value < (-1 * tolerance)) {
-      return("▼")
-    }
-
-    "→"
-  }, character(1))
-}
-
 format_score_with_n <- function(score, n, accuracy = 0.1) {
   vapply(seq_along(score), function(index) {
     if (is.na(score[[index]])) {
@@ -388,57 +154,6 @@ compute_response_rate <- function(feedback) {
   }
 
   sum(workshop_participants$responses_n) / sum(workshop_participants$n_participants)
-}
-
-flag_teacher_alerts <- function(feedback, window = rolling_window_size, floor_score = alert_floor_score, decline_delta = alert_decline_delta) {
-  rolling <- compute_rolling_average(feedback, entity = "teacher", window = window)
-  if (!nrow(rolling)) {
-    return(tibble::tibble(
-      teacher_id = character(),
-      teacher_name = character(),
-      current_rolling_average = double(),
-      current_response_n = integer(),
-      all_time_average = double(),
-      effective_threshold = double(),
-      below_threshold_n = integer(),
-      triggered_absolute_floor = logical(),
-      triggered_self_decline = logical(),
-      sparkline_values = list()
-    ))
-  }
-
-  all_time_average <- summarise_responses(feedback) |>
-    dplyr::group_by(.data$teacher_id, .data$teacher_name) |>
-    dplyr::summarise(
-      all_time_average = mean(.data$composite_score, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  rolling |>
-    dplyr::left_join(all_time_average, by = c("entity_id" = "teacher_id", "entity_name" = "teacher_name")) |>
-    dplyr::group_by(.data$entity_id, .data$entity_name, .data$all_time_average) |>
-    dplyr::summarise(
-      current_rolling_average = dplyr::last(.data$rolling_average),
-      current_response_n = dplyr::last(.data$response_n),
-      effective_threshold = dplyr::last(
-        pmax(floor_score, .data$all_time_average - decline_delta)
-      ),
-      below_threshold_n = sum(
-        .data$rolling_average < pmax(floor_score, .data$all_time_average - decline_delta),
-        na.rm = TRUE
-      ),
-      triggered_absolute_floor = dplyr::last(.data$rolling_average) < floor_score,
-      triggered_self_decline = dplyr::last(.data$rolling_average) <
-        (dplyr::last(.data$all_time_average) - decline_delta),
-      sparkline_values = list(.data$rolling_average),
-      .groups = "drop"
-    ) |>
-    dplyr::rename(
-      teacher_id = entity_id,
-      teacher_name = entity_name
-    ) |>
-    dplyr::filter(.data$triggered_absolute_floor | .data$triggered_self_decline) |>
-    dplyr::arrange(.data$current_rolling_average)
 }
 
 score_area_labels_cs <- c(

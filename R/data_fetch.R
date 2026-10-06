@@ -21,32 +21,6 @@ abort_feedback_error <- function(message, class_name = "feedback_request_error")
   )
 }
 
-validate_feedback_configuration <- function() {
-  missing_vars <- required_feedback_env_vars[
-    trimws(Sys.getenv(required_feedback_env_vars, unset = "")) == ""
-  ]
-
-  if (length(missing_vars)) {
-    abort_feedback_error(
-      paste(
-        "Chybí povinné proměnné prostředí:",
-        paste(missing_vars, collapse = ", ")
-      ),
-      class_name = "feedback_config_error"
-    )
-  }
-
-  list(
-    base_url = trimws(Sys.getenv("FEEDBACK_API_BASE_URL")),
-    token = Sys.getenv("FEEDBACK_API_TOKEN"),
-    form_id = trimws(Sys.getenv("FORM_ID"))
-  )
-}
-
-feedback_responses_url <- function(base_url, form_id) {
-  paste0(sub("/+$", "", base_url), "/forms/", form_id, "/responses")
-}
-
 feedback_since_timestamp <- function(months = DEFAULT_LOOKBACK_MONTHS) {
   lookback_date <- lubridate::`%m-%`(
     Sys.Date(),
@@ -62,15 +36,6 @@ feedback_since_timestamp <- function(months = DEFAULT_LOOKBACK_MONTHS) {
 
 pluck_path <- function(x, path, default = NULL) {
   purrr::pluck(x, !!!path, .default = default)
-}
-
-normalize_feedback_key <- function(value) {
-  normalized <- enc2utf8(as.character(value))
-  normalized <- iconv(normalized, to = "ASCII//TRANSLIT")
-  normalized <- tolower(normalized)
-  normalized <- gsub("[^a-z0-9]+", "_", normalized)
-  normalized <- gsub("^_|_$", "", normalized)
-  normalized
 }
 
 extract_named_value <- function(values, candidates) {
@@ -282,44 +247,6 @@ flatten_feedback_record <- function(record) {
   })
 }
 
-transform_feedback_payload <- function(payload_pages) {
-  if (is.null(payload_pages)) {
-    return(empty_feedback_tibble())
-  }
-
-  pages <- payload_pages
-  if (!is.null(pluck_path(payload_pages, feedback_records_path, default = NULL)) ||
-      !is.null(pluck_path(payload_pages, c("data"), default = NULL))) {
-    pages <- list(payload_pages)
-  }
-
-  feedback_rows <- purrr::map_dfr(pages, function(page_payload) {
-    records <- pluck_path(page_payload, feedback_records_path, default = NULL) %||%
-      pluck_path(page_payload, c("data"), default = list())
-    purrr::map_dfr(records, flatten_feedback_record)
-  })
-
-  if (!nrow(feedback_rows)) {
-    return(empty_feedback_tibble())
-  }
-
-  feedback_rows |>
-    dplyr::mutate(
-      response_id = as.character(.data$response_id),
-      workshop_id = as.character(.data$workshop_id),
-      workshop_date = as.Date(.data$workshop_date),
-      teacher_id = as.character(.data$teacher_id),
-      teacher_name = enc2utf8(as.character(.data$teacher_name)),
-      client_id = as.character(.data$client_id),
-      client_name = enc2utf8(as.character(.data$client_name)),
-      n_participants = as.integer(.data$n_participants),
-      dimension = enc2utf8(as.character(.data$dimension)),
-      dimension_score = as.numeric(.data$dimension_score),
-      comment_text = enc2utf8(as.character(.data$comment_text))
-    ) |>
-    append_composite_score()
-}
-
 build_feedback_request <- function(config, before = NULL) {
   request <- httr2::request(
     feedback_responses_url(config$base_url, config$form_id)
@@ -340,33 +267,6 @@ build_feedback_request <- function(config, before = NULL) {
   }
 
   request
-}
-
-request_feedback_page <- function(config, before = NULL) {
-  response <- tryCatch(
-    httr2::req_perform(build_feedback_request(config, before = before)),
-    error = function(error) {
-      abort_feedback_error(
-        paste("Volání Feedback API selhalo:", conditionMessage(error))
-      )
-    }
-  )
-
-  response_status <- httr2::resp_status(response)
-  if (response_status >= 400) {
-    abort_feedback_error(
-      paste("Feedback API vrátila chybu se stavem", response_status)
-    )
-  }
-
-  tryCatch(
-    httr2::resp_body_json(response, simplifyVector = FALSE),
-    error = function(error) {
-      abort_feedback_error(
-        paste("Odpověď Feedback API nešlo zpracovat:", conditionMessage(error))
-      )
-    }
-  )
 }
 
 fetch_feedback_pages <- function(config) {
@@ -397,11 +297,6 @@ fetch_feedback_pages <- function(config) {
   }
 
   pages
-}
-
-fetch_feedback <- function() {
-  config <- validate_feedback_configuration()
-  transform_feedback_payload(fetch_feedback_pages(config))
 }
 
 feedback_field_specs <- list(
