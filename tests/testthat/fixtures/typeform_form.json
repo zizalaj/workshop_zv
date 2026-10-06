@@ -1,0 +1,18 @@
+{
+  "id": "form-123",
+  "title": "CZ Zpětná vazba WS",
+  "fields": [
+    { "id": "field-date", "ref": "date-ref", "type": "date", "title": "Nejprve nám prosím vyplňte datum workshopu" },
+    { "id": "field-topic", "ref": "topic-ref", "type": "multiple_choice", "title": "Jaké bylo téma workshopu?" },
+    { "id": "field-overall", "ref": "overall-ref", "type": "rating", "title": "Jak hodnotíte celkově dnešní workshop?" },
+    { "id": "field-prof", "ref": "prof-ref", "type": "rating", "title": "Profesní přínos" },
+    { "id": "field-personal", "ref": "personal-ref", "type": "rating", "title": "Osobní přínos" },
+    { "id": "field-lecturer", "ref": "lecturer-ref", "type": "rating", "title": "Lektoři" },
+    { "id": "field-teacher", "ref": "teacher-ref", "type": "multiple_choice", "title": "Vyberte prosím jméno lektora/lektorky" },
+    { "id": "field-organization", "ref": "org-ref", "type": "rating", "title": "Organizace" },
+    { "id": "field-comment-positive", "ref": "comment-positive-ref", "type": "long_text", "title": "Co byste na workshopu nejvíce ocenili?" },
+    { "id": "field-comment-change", "ref": "comment-change-ref", "type": "long_text", "title": "Je něco co byste na workshopu změnili/chybělo?" },
+    { "id": "field-comment-teacher", "ref": "comment-teacher-ref", "type": "long_text", "title": "Nějaká zpráva nebo tip pro lektora/y?" },
+    { "id": "field-thanks", "ref": "thanks-ref", "type": "statement", "title": "Děkujeme." }
+  ]
+}

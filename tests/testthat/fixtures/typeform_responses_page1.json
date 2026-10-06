@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "response_id": "resp-1",
+      "token": "tok-1",
+      "response_type": "completed",
+      "status": "final",
+      "submitted_at": "2026-08-15T10:00:00Z",
+      "landed_at": "2026-08-15T09:55:00Z",
+      "answers": [
+        { "type": "number", "field": { "id": "field-prof" }, "number": 4 },
+        { "type": "date", "field": { "id": "field-date" }, "date": "2026-08-15T00:00:00Z" },
+        { "type": "text", "field": { "id": "field-comment-positive" }, "text": "Nejvíc jsem ocenil praktické příklady." },
+        { "type": "number", "field": { "id": "field-personal" }, "number": 3 },
+        { "type": "choice", "field": { "id": "field-topic" }, "choice": { "id": "topic-id-1", "ref": "topic-1", "label": "Delegování" } },
+        { "type": "number", "field": { "id": "field-overall" }, "number": 4 },
+        { "type": "text", "field": { "id": "field-comment-teacher" }, "text": "Skvělá energie." },
+        { "type": "choices", "field": { "id": "field-teacher" }, "choices": { "ids": ["teacher-id-1"], "refs": ["teacher-1"], "labels": ["Aneta Haramijová"] } },
+        { "type": "number", "field": { "id": "field-organization" }, "number": 3 },
+        { "type": "number", "field": { "id": "field-lecturer" }, "number": 4 },
+        { "type": "text", "field": { "id": "field-comment-change" }, "text": "Více času na diskusi." }
+      ]
+    },
+    {
+      "response_id": "resp-dup",
+      "token": "tok-2",
+      "response_type": "completed",
+      "status": "final",
+      "submitted_at": "2026-08-22T10:00:00Z",
+      "landed_at": "2026-08-22T09:50:00Z",
+      "answers": [
+        { "type": "text", "field": { "id": "field-comment-change" }, "text": "Méně teorie." },
+        { "type": "number", "field": { "id": "field-overall" }, "number": 2 },
+        { "type": "number", "field": { "id": "field-organization" }, "number": 1 },
+        { "type": "date", "field": { "id": "field-date" }, "date": "2026-08-22T00:00:00Z" },
+        { "type": "choices", "field": { "id": "field-teacher" }, "choices": { "ids": ["teacher-id-2", "teacher-id-3"], "refs": ["teacher-2", "teacher-3"], "labels": ["Barbora Hailandová", "Václav Wortner"] } },
+        { "type": "number", "field": { "id": "field-prof" }, "number": 2 },
+        { "type": "number", "field": { "id": "field-personal" }, "number": 1 },
+        { "type": "text", "field": { "id": "field-comment-positive" }, "text": "Líbila se otevřenost." },
+        { "type": "choice", "field": { "id": "field-topic" }, "choice": { "id": "topic-id-2", "ref": "topic-2", "label": "Práce se změnou" } },
+        { "type": "text", "field": { "id": "field-comment-teacher" }, "text": "Zpomalit tempo." },
+        { "type": "number", "field": { "id": "field-lecturer" }, "number": 2 }
+      ]
+    }
+  ]
+}

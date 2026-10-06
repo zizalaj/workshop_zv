@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "response_id": "resp-003",
+      "token": "page-2-resp-1",
+      "submitted_at": "2026-08-02T13:45:00Z",
+      "hidden": {
+        "workshop_id": "workshop-103",
+        "workshop_date": "2026-08-02",
+        "teacher_id": "teacher-1",
+        "teacher_name": "Adela Kratochvilova",
+        "client_id": "client-3",
+        "client_name": "Cobalt Retail",
+        "n_participants": "9"
+      },
+      "answers": [
+        { "type": "number", "field": { "ref": "content" }, "number": 4.1 },
+        { "type": "number", "field": { "ref": "delivery" }, "number": 3.9 },
+        { "type": "text", "field": { "ref": "comment_text" }, "text": "Prakticke tipy byly uzitecne." }
+      ]
+    }
+  ]
+}

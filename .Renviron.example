@@ -1,0 +1,3 @@
+FEEDBACK_API_BASE_URL=https://api.example.com
+FEEDBACK_API_TOKEN=example_token
+FORM_ID=example_form_id

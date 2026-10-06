@@ -1,0 +1,17 @@
+.Renviron
+.Renviron.example
+.env
+.Rhistory
+.Rproj.user
+.agents
+config.toml
+fonts
+ju_logo.svg
+Nový Textový dokument.txt
+process_api_form_inspiration.R
+README.md
+REPOSITORY_MAP.md
+renv.lock
+renv/library
+renv/staging
+tests

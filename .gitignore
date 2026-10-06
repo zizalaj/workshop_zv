@@ -1,0 +1,10 @@
+.Renviron
+.env
+*.log
+.Rhistory
+.RData
+.Rproj.user/
+.agents/
+renv/library/
+renv/staging/
+rsconnect/

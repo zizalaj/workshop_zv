@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "response_id": "resp-dup",
+      "token": "tok-3",
+      "response_type": "completed",
+      "status": "final",
+      "submitted_at": "2026-09-01T10:00:00Z",
+      "landed_at": "2026-09-01T09:57:00Z",
+      "answers": [
+        { "type": "number", "field": { "id": "field-overall" }, "number": 3 },
+        { "type": "number", "field": { "id": "field-prof" }, "number": 3 },
+        { "type": "number", "field": { "id": "field-personal" }, "number": 4 },
+        { "type": "number", "field": { "id": "field-lecturer" }, "number": 3 },
+        { "type": "number", "field": { "id": "field-organization" }, "number": 4 },
+        { "type": "choices", "field": { "id": "field-teacher" }, "choices": { "ids": ["teacher-id-1"], "refs": ["teacher-1"], "labels": ["Aneta Haramijová"] } },
+        { "type": "choice", "field": { "id": "field-topic" }, "choice": { "id": "topic-id-1", "ref": "topic-1", "label": "Delegování" } },
+        { "type": "date", "field": { "id": "field-date" }, "date": "1996-01-12T00:00:00Z" },
+        { "type": "text", "field": { "id": "field-comment-positive" }, "text": "Praktické vedení." },
+        { "type": "text", "field": { "id": "field-comment-change" }, "text": "Delší cvičení." },
+        { "type": "text", "field": { "id": "field-comment-teacher" }, "text": "Děkuji." }
+      ]
+    }
+  ]
+}

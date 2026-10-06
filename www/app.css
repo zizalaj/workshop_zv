@@ -1,0 +1,203 @@
+@font-face {
+  font-family: "EuropaGroNr2JU";
+  src: url("fonts/EuropaGroNr2JU Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EuropaGroNr2JU";
+  src: url("fonts/EuropaGroNr2JU Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Nova";
+  src: url("fonts/ArialNova.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Nova";
+  src: url("fonts/ArialNova-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(99, 232, 198, 0.25), transparent 30%),
+    linear-gradient(180deg, #feffff 0%, #f0f0f2 100%);
+  color: #1f1c24;
+  font-family: "Arial Nova", Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand, .card-title, .value-box-title {
+  font-family: "EuropaGroNr2JU", Arial, sans-serif;
+  font-weight: 700;
+}
+
+.bslib-page-sidebar .card,
+.card,
+.value-box {
+  border: none;
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 45px rgba(31, 28, 36, 0.08);
+}
+
+.ju-navbar-brand {
+  align-items: center;
+  display: flex;
+  gap: 0.9rem;
+}
+
+.ju-navbar-logo {
+  height: 42px;
+  width: auto;
+}
+
+.ju-navbar-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ju-navbar-title {
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.ju-navbar-subtitle {
+  color: #5c5867;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.ju-state-shell {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 40rem;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.ju-state-logo {
+  height: 68px;
+  width: auto;
+}
+
+.ju-state-title {
+  color: #1f1c24;
+  font-size: 2.1rem;
+  margin: 0;
+}
+
+.ju-state-copy {
+  color: #4a4653;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 34rem;
+}
+
+.ju-spinner {
+  animation: ju-spin 1s linear infinite;
+  border: 6px solid rgba(0, 171, 139, 0.15);
+  border-top-color: #00ab8b;
+  border-radius: 50%;
+  height: 64px;
+  width: 64px;
+}
+
+@keyframes ju-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ju-primary-button {
+  background: #1f1c24;
+  border: none;
+  border-radius: 999px;
+  color: #feffff;
+  font-weight: 700;
+  padding: 0.8rem 1.4rem;
+}
+
+.ju-primary-button:hover,
+.ju-primary-button:focus {
+  background: #00ab8b;
+  color: #feffff;
+}
+
+.ju-filter-note,
+.ju-inline-status {
+  border-radius: 1rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+}
+
+.ju-filter-note {
+  background: #b7ffe6;
+}
+
+.ju-inline-status {
+  background: #f0f0f2;
+}
+
+.ju-inline-status.is-error {
+  background: rgba(255, 103, 170, 0.15);
+  color: #1f1c24;
+}
+
+.ju-kpi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ju-kpi-value {
+  font-family: "EuropaGroNr2JU", Arial, sans-serif;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.ju-kpi-meta {
+  color: #5c5867;
+  font-size: 0.92rem;
+}
+
+.ju-empty-state {
+  background: #f0f0f2;
+  border-radius: 1.25rem;
+  color: #4a4653;
+  padding: 1.2rem 1.4rem;
+}
+
+.ju-table-wrap .dataTables_wrapper .dataTables_filter input,
+.ju-table-wrap .dataTables_wrapper .dataTables_length select {
+  border-radius: 0.75rem;
+}
+
+.ju-droplet-mark {
+  background: #00ab8b;
+  border-radius: 50% 50% 50% 0;
+  bottom: 1.5rem;
+  height: 18px;
+  position: fixed;
+  right: 1.75rem;
+  transform: rotate(-45deg);
+  width: 18px;
+  z-index: 20;
+}
