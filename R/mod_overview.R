@@ -54,7 +54,7 @@ mod_overview_ui <- function(id) {
           color = ju_palette$primary_mint
         )
       ),
-      col_widths = c(7, 5)
+      col_widths = c(12, 12)
     )
   )
 }
