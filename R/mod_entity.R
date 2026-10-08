@@ -83,7 +83,7 @@ build_entity_summary_table <- function(table_data, entity_type) {
           Lektor = .data$teacher_name,
           Workshopy = .data$workshops,
           Odpovědi = .data$responses,
-          dplyr::all_of(intersect(score_columns, names(.))),
+          dplyr::any_of(score_columns),
           `Hlavní hodnocení` = .data$`Hlavní hodnocení`,
           Trend
         )
@@ -96,7 +96,7 @@ build_entity_summary_table <- function(table_data, entity_type) {
       Lektoři = .data$teachers,
       Workshopy = .data$workshops,
       Odpovědi = .data$responses,
-      dplyr::all_of(intersect(score_columns, names(.))),
+      dplyr::any_of(score_columns),
       `Hlavní hodnocení` = .data$`Hlavní hodnocení`,
       Trend
     )
@@ -403,6 +403,7 @@ mod_entity_server <- function(id, entity_type, filtered_data, comparison_data, f
       filters <- filters_reactive()
       response_summary <- build_entity_response_summary(selected_feedback(), config$entity_type)
       score_summary <- summarise_score_areas(selected_feedback(), config$entity_type) |>
+        drop_excluded_score_areas(config$entity_type) |>
         dplyr::mutate(display = format_score_with_n(.data$average_score, .data$response_n)) |>
         dplyr::select(entity_id, metric_label_cs, display) |>
         tidyr::pivot_wider(names_from = .data$metric_label_cs, values_from = .data$display)
