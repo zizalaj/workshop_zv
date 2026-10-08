@@ -8,7 +8,7 @@ Snapshot date: September 1, 2026.
 - `R/data_fetch.R` owns runtime configuration checks, API requests, pagination, and payload transformation into the canonical long-format dataset.
 - `R/utils_scoring.R` contains the shared business logic for composite scoring, rolling calculations, filtering, and alerts.
 - `R/utils_theme.R` contains the shared visual helpers, asset lookup, DataTables localization, and Czech date-formatting helpers.
-- `R/mod_sidebar_filters.R`, `R/mod_overview.R`, `R/mod_entity.R`, `R/mod_compare.R`, `R/mod_comments.R`, and `R/mod_alerts.R` are the active dashboard modules.
+- `R/mod_sidebar_filters.R`, `R/mod_overview.R`, `R/mod_entity.R`, `R/mod_comments.R`, and `R/mod_alerts.R` are the active dashboard modules.
 - `www/` contains the only runtime assets: `app.css`, `fonts/`, and `logo/`.
 
 ## Data flow

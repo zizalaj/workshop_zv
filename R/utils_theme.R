@@ -230,12 +230,17 @@ ju_apply_plotly_theme <- function(fig, title = NULL, showlegend = TRUE) {
         )
       )
     },
+    # Pin the legend to the bottom edge of the figure and reserve margin for it,
+    # so it never overlaps the x-axis title regardless of plot height.
     legend = list(
       orientation = "h",
       x = 0,
-      y = -0.15
+      xanchor = "left",
+      yref = "container",
+      y = 0,
+      yanchor = "bottom"
     ),
-    margin = list(l = 60, r = 30, t = if (is.null(title)) 40 else 72, b = 60),
+    margin = list(l = 60, r = 30, t = if (is.null(title)) 40 else 72, b = if (showlegend) 110 else 60),
     showlegend = showlegend
   )
 }

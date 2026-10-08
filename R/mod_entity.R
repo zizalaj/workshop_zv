@@ -228,11 +228,13 @@ mod_entity_server <- function(id, entity_type, filtered_data, comparison_data, f
 
       metric_order <- ordered_score_area_keys(score_data$metric_key)
       entity_profile <- summarise_score_areas(dataset, config$entity_type) |>
+        drop_excluded_score_areas(config$entity_type) |>
         dplyr::filter(.data$entity_id == selected_entity_ids()) |>
         dplyr::mutate(metric_label_cs = factor(.data$metric_label_cs, levels = ordered_score_area_labels(metric_order))) |>
         dplyr::arrange(.data$metric_label_cs)
 
       benchmark <- feedback_scores_long(filtered_data()) |>
+        drop_excluded_score_areas(config$entity_type) |>
         dplyr::group_by(.data$metric_key, .data$metric_label_cs) |>
         dplyr::summarise(
           average_score = mean(.data$score, na.rm = TRUE),
@@ -305,6 +307,7 @@ mod_entity_server <- function(id, entity_type, filtered_data, comparison_data, f
       }
 
       plot_data <- summarise_score_areas(dataset, config$entity_type) |>
+        drop_excluded_score_areas(config$entity_type) |>
         dplyr::mutate(
           metric_label_cs = factor(.data$metric_label_cs, levels = ordered_score_area_labels(.data$metric_key)),
           tooltip = paste0(

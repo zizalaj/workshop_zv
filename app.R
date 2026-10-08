@@ -6,7 +6,6 @@ source(file.path("R", "data_fetch.R"), local = FALSE)
 source(file.path("R", "mod_sidebar_filters.R"), local = FALSE)
 source(file.path("R", "mod_overview.R"), local = FALSE)
 source(file.path("R", "mod_entity.R"), local = FALSE)
-source(file.path("R", "mod_compare.R"), local = FALSE)
 source(file.path("R", "mod_comments.R"), local = FALSE)
 source(file.path("R", "mod_alerts.R"), local = FALSE)
 
@@ -62,6 +61,29 @@ error_state_ui <- function(error_state) {
   )
 }
 
+login_state_ui <- function(configured) {
+  shiny::tags$div(
+    class = "ju-state-shell",
+    ju_logo_tag("ju-state-logo"),
+    shiny::tags$h1(class = "ju-state-title", "Přihlášení"),
+    if (configured) {
+      shiny::tags$div(
+        class = "ju-login-form",
+        shiny::passwordInput("login_password", "Heslo", width = "100%"),
+        shiny::uiOutput("login_message"),
+        shiny::actionButton(
+          "login_submit",
+          "Přihlásit",
+          class = "btn ju-primary-button"
+        )
+      )
+    } else {
+      shiny::tags$p(class = "ju-state-copy", "Přihlášení není nakonfigurováno.")
+    },
+    shiny::tags$div(class = "ju-droplet-mark")
+  )
+}
+
 dashboard_ui <- function() {
   shiny::tagList(
     bslib::page_navbar(
@@ -78,7 +100,6 @@ dashboard_ui <- function() {
       mod_overview_ui("overview"),
       mod_entity_ui("teacher", "teacher"),
       mod_entity_ui("topic", "topic"),
-      mod_compare_ui("compare"),
       mod_comments_ui("comments"),
       mod_alerts_ui("alerts")
     ),
@@ -89,7 +110,16 @@ dashboard_ui <- function() {
 ui <- shiny::fluidPage(
   theme = ju_theme(),
   shiny::tags$head(
-    shiny::includeCSS(file.path("www", "app.css"))
+    shiny::includeCSS(file.path("www", "app.css")),
+    shiny::tags$script(shiny::HTML(
+      "$(document).on('keydown', '#login_password', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          $(this).trigger('change');
+          $('#login_submit').click();
+        }
+      });"
+    ))
   ),
   shiny::uiOutput("app_shell")
 )
@@ -100,8 +130,13 @@ server <- function(input, output, session) {
     loading = FALSE,
     error = NULL,
     last_updated = NULL,
-    initialized = FALSE
+    initialized = FALSE,
+    authenticated = FALSE
   )
+
+  app_password <- Sys.getenv("APP_PASSWORD", unset = "")
+  login_configured <- nzchar(trimws(app_password))
+  login_failed <- shiny::reactiveVal(FALSE)
 
   as_app_error <- function(error, has_existing_data = FALSE) {
     error_type <- if (inherits(error, "feedback_config_error")) {
@@ -203,11 +238,6 @@ server <- function(input, output, session) {
     filters_reactive = sidebar_state$filters
   )
 
-  mod_compare_server(
-    "compare",
-    filtered_data = filtered_data
-  )
-
   mod_comments_server(
     "comments",
     filtered_data = filtered_data
@@ -226,11 +256,35 @@ server <- function(input, output, session) {
     load_feedback_data()
   }, ignoreInit = TRUE)
 
-  observeEvent(TRUE, {
-    load_feedback_data()
-  }, once = TRUE, ignoreInit = FALSE)
+  observeEvent(input$login_submit, {
+    if (!login_configured || isTRUE(state$authenticated)) {
+      return(invisible(NULL))
+    }
+
+    if (!identical(input$login_password %||% "", app_password)) {
+      login_failed(TRUE)
+      return(invisible(NULL))
+    }
+
+    login_failed(FALSE)
+    state$authenticated <- TRUE
+    # Fetch after the loading screen has been sent to the browser.
+    session$onFlushed(function() {
+      shiny::isolate(load_feedback_data())
+    }, once = TRUE)
+  })
+
+  output$login_message <- shiny::renderUI({
+    if (isTRUE(login_failed())) {
+      shiny::tags$p(class = "ju-login-error", role = "alert", "Nesprávné heslo.")
+    }
+  })
 
   output$app_shell <- shiny::renderUI({
+    if (!isTRUE(state$authenticated)) {
+      return(login_state_ui(login_configured))
+    }
+
     current_data <- state$data
 
     if (is.null(current_data) && (!isTRUE(state$initialized) || isTRUE(state$loading))) {

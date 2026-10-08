@@ -116,9 +116,26 @@ mod_overview_server <- function(id, filtered_data, comparison_data, filters_reac
         paste0(trend_arrow(delta_info$delta), " ", scales::number(delta_info$delta, accuracy = 0.1, style_positive = "plus"))
       }
 
+      bounds <- delta_info$bounds
+      meta <- if (is.null(bounds)) {
+        paste0("Aktuální n=", delta_info$current_n, " vs. předchozí n=", delta_info$prior_n)
+      } else {
+        shiny::tagList(
+          paste0(
+            "Aktuální: ", format_cz_date(bounds$current_start), " – ", format_cz_date(bounds$current_end),
+            " (n=", delta_info$current_n, ")"
+          ),
+          shiny::tags$br(),
+          paste0(
+            "Předchozí: ", format_cz_date(bounds$prior_start), " – ", format_cz_date(bounds$prior_end),
+            " (n=", delta_info$prior_n, ")"
+          )
+        )
+      }
+
       overview_kpi_value_ui(
         value = delta_label,
-        meta = paste0("Aktuální n=", delta_info$current_n, " vs. předchozí n=", delta_info$prior_n)
+        meta = meta
       )
     })
 
@@ -231,7 +248,8 @@ mod_overview_server <- function(id, filtered_data, comparison_data, filters_reac
         text = ~tooltip,
         hovertemplate = "%{text}<extra></extra>",
         colors = c(ju_palette$pale_mint, ju_palette$primary_mint, ju_palette$dark_teal)
-      )
+      ) |>
+        plotly::colorbar(title = "Průměrné hodnocení")
 
       ju_apply_plotly_theme(fig, showlegend = FALSE) |>
         plotly::layout(

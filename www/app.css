@@ -141,6 +141,25 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .card-title, .value-box-title {
   color: #feffff;
 }
 
+.ju-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 20rem;
+  text-align: left;
+  width: 100%;
+}
+
+.ju-login-form .form-group {
+  margin-bottom: 0;
+}
+
+.ju-login-error {
+  color: #c2185b;
+  font-weight: 700;
+  margin: 0;
+}
+
 .ju-filter-note,
 .ju-inline-status {
   border-radius: 1rem;

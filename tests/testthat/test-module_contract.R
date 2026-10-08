@@ -5,13 +5,6 @@ test_that("sidebar UI replaces client with workshop topic and score areas", {
   expect_match(html, "Hodnocené oblasti")
 })
 
-test_that("compare UI offers teacher and workshop topic modes", {
-  html <- htmltools::renderTags(mod_compare_ui("compare"))$html
-
-  expect_match(html, "Lektoři")
-  expect_match(html, "Témata workshopů")
-})
-
 test_that("overview UI shows response-count KPI", {
   html <- htmltools::renderTags(mod_overview_ui("overview"))$html
 

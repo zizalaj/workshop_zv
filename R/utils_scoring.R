@@ -163,6 +163,19 @@ score_area_labels_cs <- c(
   organization = "Organizace"
 )
 
+# Score areas that do not describe the entity: professional benefit belongs
+# to the workshop topic, the lecturer rating to the lecturer.
+entity_excluded_score_areas <- list(
+  teacher = "professional_benefit",
+  topic = "lecturer"
+)
+
+drop_excluded_score_areas <- function(score_data, entity = c("teacher", "topic")) {
+  entity <- match.arg(entity)
+  score_data |>
+    dplyr::filter(!.data$metric_key %in% entity_excluded_score_areas[[entity]])
+}
+
 empty_responses_tibble <- function() {
   tibble::tibble(
     submission_key = character(),
@@ -497,7 +510,8 @@ compute_overall_delta <- function(feedback, start_date, end_date) {
     prior_average = prior_average,
     current_n = nrow(periods$current),
     prior_n = nrow(periods$prior),
-    delta = current_average - prior_average
+    delta = current_average - prior_average,
+    bounds = periods$bounds
   )
 }
 
